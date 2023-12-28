@@ -7,7 +7,7 @@ clearvars;
 
 %optionen für das Programm
 
-currentSweep = true;
+currentSweep = false;
 percentage = 0.9;       % Eingabe für bei welchen I0 untersucht werden soll, für vollen Sweep = [] setzen, spezieller Wert reduziert die Zeit zum durchführen erhelich.
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
 freqSweep = true;          % option für Sweep der Frequenz; 1 für an, 0 für aus. Bei aus wird baseFreq als Frequenz benutzt.
@@ -25,8 +25,10 @@ Ec = 1e-4;          % electric field at J=Jc [V/m]
 %n_variable=[36.18,32.17,28.55,26.21,25.49,26.65,25.26,24.6,24.53,24.42,24.59,25.32,23.83,23.54,24.14,23.31,24.28,23.66,23.43,23.55,23.15,23.7,23.23,23.35,23.53,23.49,37.22,33.63,23.47,5.21]; %Manuell Eingetragenes n, ändern
 %n = 50;             % n-value
 N = 100;            % number of elements for numerical calculation
- % Matrix zur Untersuchung von Verlust, ändern zu variabel
+% Matrix zur Untersuchung von Verlust, ändern zu variabel
 
+%Variabeln Definieren
+mu0 = 4e-7*pi;
 %Einlesen und Processing von externen Dateien, Definition von Variablen
 tempDat1 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence.csv");      %Dateien in temporäre Matrix einlesen
 tempDat2 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence-2.csv");    %Dateien in temporäre Matrix einlesen
@@ -191,6 +193,11 @@ for i = 1:numel(I0_vector)
         q_values(count,count2,count3) = Q_vector(24);     %Fallback auf Verlust bei I0 = 80%Ic 24, da Ic in 30 aufgeteilt ist
     else
         q_values(count,count2,count3) = Q_vector(i); 
+        q_norris_values(count,count2,count3) = mu0*Ic^2/pi * ( ...
+            (1-I0_vector/Ic).*log(1-I0_vector/Ic) + ...
+            (1+I0_vector/Ic).*log(1+I0_vector/Ic) - ...
+            (I0_vector/Ic).^2 ...
+        );
     end
 
 
@@ -207,7 +214,6 @@ clf
 semilogy(I0_vector,Q_vector)
 hold on
 % compare with exact result from Norris
-mu0 = 4e-7*pi;
 Q_norris = mu0*Ic^2/pi * ( ...
     (1-I0_vector/Ic).*log(1-I0_vector/Ic) + ...
     (1+I0_vector/Ic).*log(1+I0_vector/Ic) - ...
