@@ -192,6 +192,8 @@ for i = 1:numel(I0_vector)
     if currentSweep == true
         q_values(count,count2,count3) = Q_vector(24);     %Fallback auf Verlust bei I0 = 80%Ic 24, da Ic in 30 aufgeteilt ist
     else
+        %norris ist nicht von frequenz abhängig, also vielleicht ändern,
+        %oder nur für keinen Sweep benutzen
         q_values(count,count2,count3) = Q_vector(i); 
         q_norris_values(count,count2,count3) = mu0*Ic^2/pi * ( ...
             (1-I0_vector/Ic).*log(1-I0_vector/Ic) + ...
@@ -254,7 +256,9 @@ figure(110)
 clf
 for k = 1:size(q_values,3)
     subplot(2,2,k)
-    plot(temperature,q_values(:,:,k)) 
+    plot(temperature,q_values(:,:,k))
+    hold on
+    plot(temperature,q_norris_values(:,:,k),'DisplayName','Norris')
     ylim([0 qMax])
     xlim([temperature(1) temperature(end)])
     title(['Breite = ',num2str(1000*W_variable(k)),' mm'])
