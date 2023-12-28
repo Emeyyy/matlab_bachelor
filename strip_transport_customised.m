@@ -10,7 +10,7 @@ clearvars;
 currentSweep = false;
 percentage = 0.9;       % Eingabe für bei welchen I0 untersucht werden soll, für vollen Sweep = [] setzen, spezieller Wert reduziert die Zeit zum durchführen erhelich.
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
-freqSweep = true;          % option für Sweep der Frequenz; 1 für an, 0 für aus. Bei aus wird baseFreq als Frequenz benutzt.
+freqSweep = false;          % option für Sweep der Frequenz; 1 für an, 0 für aus. Bei aus wird baseFreq als Frequenz benutzt.
 baseFreq = 1;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
 endFreq = 100;          % Endfrequenz für Sweep [Hz]
 freqSteps = 2;          % Schritte für den Frequenzsweep
@@ -161,9 +161,6 @@ for i = 1:numel(I0_vector)
     end
 
     %anfang für heatmap?
-
-    
-    
     if heatmap == 1
         maxMatrix = max(J, [], 1); %höchste werte der matrix auslesen
         figure(104)
@@ -243,6 +240,7 @@ if freqSweep == false
     for k=1:size(q_noFreqSweep,2)
         plot(temperature,q_noFreqSweep(:,k),'DisplayName',[num2str(1000*W_variable(k)),' mm'])
         hold on
+        plot(temperature,q_norris_values(:,:,k),'DisplayName','Norris')
         legend()
     end
     xlim([temperature(1) temperature(end)])
@@ -264,6 +262,7 @@ for k = 1:size(q_values,3)
     title(['Breite = ',num2str(1000*W_variable(k)),' mm'])
     xlabel('Temperatur [K]')
     ylabel('Q [J/m]')
+    legend()
 end
 
 figure(111)
