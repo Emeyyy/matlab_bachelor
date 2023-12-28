@@ -47,8 +47,8 @@ end
 
 
 % external magnetic field (perpendicular) and applied current
-f = 1;              % frequency [Hz]
-B0 = 0.0;           % amplitude [T]
+%f = 1;              % frequency [Hz]
+%B0 = 0.0;           % amplitude [T]
 %omega = 2*pi*f;
 %Bext = @(t) B0*sin(omega*t);
 %Bdot = @(t) omega*B0*cos(omega*t); % time derivative
