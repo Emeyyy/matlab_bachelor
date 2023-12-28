@@ -1,0 +1,7 @@
+true
+false
+69 %blabla
+34
+56
+
+45
