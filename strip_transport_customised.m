@@ -17,17 +17,10 @@ freqSteps = 2;          % Schritte für den Frequenzsweep
 
 % strip properties
 W_variable=[0.012,0.006,0.004,0.003]; % Erhältliche Breiten des zu untersuchenden Leiters, Manuell eintragen
-%W = 0.004;          % strip width [m] hier 12mm-3mm
-%Jc_variable=[244595,234680,223735,214177,205398,197477,188208,179385,170867,162302,153747,145476,136253,127543,119215,110275,101944,93111,84464,75649,66811,58102,49181,40393,31702,23239,15537,8375,2952,124]; %Manuell Eingetragenes Jc, ändern
-%Jc = 25e3;          % critical current per unit width [A/m]
-%Ic = Jc*W;          % critical current [A]
 Ec = 1e-4;          % electric field at J=Jc [V/m]
-%n_variable=[36.18,32.17,28.55,26.21,25.49,26.65,25.26,24.6,24.53,24.42,24.59,25.32,23.83,23.54,24.14,23.31,24.28,23.66,23.43,23.55,23.15,23.7,23.23,23.35,23.53,23.49,37.22,33.63,23.47,5.21]; %Manuell Eingetragenes n, ändern
-%n = 50;             % n-value
 N = 100;            % number of elements for numerical calculation
-% Matrix zur Untersuchung von Verlust, ändern zu variabel
 
-%Variabeln Definieren
+%Konstanten Definieren
 mu0 = 4e-7*pi;
 %Einlesen und Processing von externen Dateien, Definition von Variablen
 tempDat1 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence.csv");      %Dateien in temporäre Matrix einlesen
@@ -42,16 +35,6 @@ if freqSweep == true
 else
     f_variable = baseFreq;
 end
-
-
-
-
-% external magnetic field (perpendicular) and applied current
-%f = 1;              % frequency [Hz]
-%B0 = 0.0;           % amplitude [T]
-%omega = 2*pi*f;
-%Bext = @(t) B0*sin(omega*t);
-%Bdot = @(t) omega*B0*cos(omega*t); % time derivative
 
 q_values = zeros(size(Jc_variable,2),size(f_variable,2),size(W_variable,2));
 
@@ -76,7 +59,6 @@ for count2 = 1:length(f_variable)
     Bext = @(t) B0*sin(omega*t);
     Bdot = @(t) omega*B0*cos(omega*t);
     
-
 for count = 1:length(n_variable)
 
     Ic = Jc_variable(count)*W_variable(count3); 
@@ -172,8 +154,6 @@ for i = 1:numel(I0_vector)
         ylabel('J [A/m]')
         drawnow
         
-        % figure(105)
-        % pcolor(J(N_step:10:2*N_step,:))
     else
     %figure with current distribution
         figure(100)
