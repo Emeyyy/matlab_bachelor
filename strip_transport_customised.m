@@ -7,10 +7,10 @@ clearvars;
 
 %optionen für das Programm
 
-currentSweep = false;
-percentage = 0.9;       % Eingabe für bei welchen I0 untersucht werden soll, für vollen Sweep = [] setzen, spezieller Wert reduziert die Zeit zum durchführen erhelich.
+currentSweep = false;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
+percentage = 0.9;       % Wenn currentSweep = false: Eingabe für bei welchen I0 = x*Ic untersucht werden soll
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
-freqSweep = false;          % option für Sweep der Frequenz; 1 für an, 0 für aus. Bei aus wird baseFreq als Frequenz benutzt.
+freqSweep = false;      % option für Sweep der Frequenz; true für an, false für aus. Bei aus wird baseFreq als Frequenz benutzt.
 baseFreq = 1;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
 endFreq = 100;          % Endfrequenz für Sweep [Hz]
 freqSteps = 2;          % Schritte für den Frequenzsweep
@@ -20,9 +20,9 @@ W_variable=[0.012,0.006,0.004,0.003]; % Erhältliche Breiten des zu untersuchend
 Ec = 1e-4;          % electric field at J=Jc [V/m]
 N = 100;            % number of elements for numerical calculation
 
-%Konstanten Definieren
+% Konstanten Definieren
 mu0 = 4e-7*pi;
-%Einlesen und Processing von externen Dateien, Definition von Variablen
+% Einlesen und Processing von externen Dateien, Definition von Variablen
 tempDat1 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence.csv");      %Dateien in temporäre Matrix einlesen
 tempDat2 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence-2.csv");    %Dateien in temporäre Matrix einlesen
 tempDat1 = rmmissing(tempDat1);     %NaN Eintrage entfernen
@@ -30,38 +30,36 @@ tempDat2 = rmmissing(tempDat2);
 temperature = flip(tempDat1(:,1))';         %Daten flippen und transponieren, um mit den restlichen Vektoren übereinzustimmen
 Jc_variable = 100*flip(tempDat1(:,4))';     %Hier auch mit 100 multiplizieren, damit die Einheiten stimmen
 n_variable = flip(tempDat2(:,4))';
+
+% Setzen der Frequenzvariable
 if freqSweep == true
     f_variable = linspace(baseFreq,endFreq,freqSteps);
 else
     f_variable = baseFreq;
 end
 
-q_values = zeros(size(Jc_variable,2),size(f_variable,2),size(W_variable,2));
 
-% applied current
-%I0_vector = linspace(Ic/30,Ic,30); % amplitude vector
+q_values = zeros(size(Jc_variable,2),size(f_variable,2),size(W_variable,2));    % Matrix für Abspeicherung der Werte definieren
+
 gamma = 100;        % feedback constant for voltage source [V/m/A]
 
-% time vector
 N_step = 1000;      % time steps per cycle
-%dt = 1/(N_step*f);  % time step [s]
-%t = 0:dt:2/f;       % time vector (2 cycles)
-
 
 %%% END OF SETTINGS %%%
-for count3 = 1:length(W_variable)
+for count3 = 1:length(W_variable)   % for loop für Breitensweep
 
-for count2 = 1:length(f_variable)
+for count2 = 1:length(f_variable)   % for loop für Frequenzsweep
 
+    % Definition von Zeitvariablen
     omega = 2*pi*f_variable(count2);
     dt = 1/(N_step*f_variable(count2));
     t = 0:dt:2/f_variable(count2);
     Bext = @(t) B0*sin(omega*t);
     Bdot = @(t) omega*B0*cos(omega*t);
     
-for count = 1:length(n_variable)
+for count = 1:length(temperature)    % for loop für Temperatursweep
 
-    Ic = Jc_variable(count)*W_variable(count3); 
+    Ic = Jc_variable(count)*W_variable(count3);     %Kritischen Strom für momentane Temperatur setzen
 
     if currentSweep == true
         I0_vector = linspace(Ic/30,Ic,30);
@@ -88,7 +86,7 @@ for i = 1:N
     end
 end
 
-% create vector for the AC loss results
+% create vector for the AC loss results VIELLEICHT LÖSCHEN
 Q_vector = zeros(size(I0_vector)); % AC loss per cycle [J/m]
 
 for i = 1:numel(I0_vector)
@@ -144,7 +142,7 @@ for i = 1:numel(I0_vector)
 
     %anfang für heatmap?
     if heatmap == 1
-        maxMatrix = max(J, [], 1); %höchste werte der matrix auslesen
+        maxMatrix = max(J, [], 1); %jeweils höchste werte der matrix auslesen
         figure(104)
         clf
         area(y_middle,maxMatrix)
@@ -204,17 +202,17 @@ xlabel('I_0 [A]')
 ylabel('Q [J/m]')
 legend('Numeric','Norris')
 end
-
 end
 end
 end
 
 
-qMax = max(q_values, [], 'all');
+qMax = max(q_values, [], 'all');    % Maximaler Wert der Endergebnisse auslesen
 
 
+% Plotten der Ergebnisse für ohne Frequenzsweep, oder mit
 if freqSweep == false
-    q_noFreqSweep = squeeze(q_values);
+    q_noFreqSweep = squeeze(q_values);  % Leere Dimension der Matrix entfernen
     figure(200)
     clf
     for k=1:size(q_noFreqSweep,2)
@@ -228,16 +226,17 @@ if freqSweep == false
     xlabel('Temperatur [K]')
     ylabel('Q [J/m')
 else
-%verschiedene plots für jeweils unterschiedliche längen, in jedem plot
-%versch. frequenzen und temperaturen
+% verschiedene plots für jeweils unterschiedliche breiten, in jedem plot
+% versch. frequenzen und temperaturen
 figure(110)
 clf
+% Bessere art finden Norris darzustellen
 for k = 1:size(q_values,3)
     subplot(2,2,k)
     plot(temperature,q_values(:,:,k))
     hold on
     plot(temperature,q_norris_values(:,:,k),'DisplayName','Norris')
-    ylim([0 qMax])
+    ylim([0 qMax])  % Oberes Limit auf größten Wert festsetzen, um Ergebnisse besser vergleichen zu können
     xlim([temperature(1) temperature(end)])
     title(['Breite = ',num2str(1000*W_variable(k)),' mm'])
     xlabel('Temperatur [K]')
@@ -245,6 +244,7 @@ for k = 1:size(q_values,3)
     legend()
 end
 
+% Das selbe wie oben, bloss als logarithmisch dargestellt
 figure(111)
 clf
 for k = 1:size(q_values,3)
