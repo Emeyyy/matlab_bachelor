@@ -39,7 +39,8 @@ else
 end
 
 
-q_values = zeros(size(Jc_variable,2),size(f_variable,2),size(W_variable,2));    % Matrix für Abspeicherung der Werte definieren
+q_values = zeros(size(Jc_variable,2),size(f_variable,2),size(W_variable,2));% Matrix für Abspeicherung der Werte definieren
+q_norris_values = zeros(size(q_values));
 
 gamma = 100;        % feedback constant for voltage source [V/m/A]
 
