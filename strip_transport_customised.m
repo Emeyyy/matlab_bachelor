@@ -52,6 +52,7 @@ for count3 = 1:length(W_variable)   % for loop für Breitensweep
 for count2 = 1:length(f_variable)   % for loop für Frequenzsweep
 
     % Definition von Zeitvariablen
+    B0 = 0.0;
     omega = 2*pi*f_variable(count2);
     dt = 1/(N_step*f_variable(count2));
     t = 0:dt:2/f_variable(count2);
