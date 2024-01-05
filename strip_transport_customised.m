@@ -12,7 +12,7 @@ percentage = 0.9;       % Wenn currentSweep = false: Eingabe für bei welchen I0
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
 freqSweep = false;      % option für Sweep der Frequenz; true für an, false für aus. Bei aus wird baseFreq als Frequenz benutzt.
 baseFreq = 1;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
-endFreq = 100;          % Endfrequenz für Sweep [Hz]
+endFreq = 10;          % Endfrequenz für Sweep [Hz]
 freqSteps = 2;          % Schritte für den Frequenzsweep
 
 % strip properties
@@ -23,8 +23,8 @@ N = 100;            % number of elements for numerical calculation
 % Konstanten Definieren
 mu0 = 4e-7*pi;
 % Einlesen und Processing von externen Dateien, Definition von Variablen
-tempDat1 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence.csv");      %Dateien in temporäre Matrix einlesen
-tempDat2 = readmatrix("THEVA Pro-Line 2G HTS 0 T Temperature Dependence-2.csv");    %Dateien in temporäre Matrix einlesen
+tempDat1 = readmatrix("Data_n.csv");      %Dateien in temporäre Matrix einlesen
+tempDat2 = readmatrix("Data_Jc.csv");    %Dateien in temporäre Matrix einlesen
 tempDat1 = rmmissing(tempDat1);     %NaN Eintrage entfernen
 tempDat2 = rmmissing(tempDat2);
 temperature = flip(tempDat1(:,1))';         %Daten flippen und transponieren, um mit den restlichen Vektoren übereinzustimmen
