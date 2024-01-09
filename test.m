@@ -1,1 +1,2 @@
-[test1,test2]=readvars('config.txt');
+figure(899)
+plot(I0_vector,[0 0])

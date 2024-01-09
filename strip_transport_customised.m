@@ -7,10 +7,10 @@ clearvars;
 
 %optionen für das Programm
 
-currentSweep = false;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
+currentSweep = true;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
 percentage = 0.9;       % Wenn currentSweep = false: Eingabe für bei welchen I0 = x*Ic untersucht werden soll
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
-freqSweep = false;      % option für Sweep der Frequenz; true für an, false für aus. Bei aus wird baseFreq als Frequenz benutzt.
+freqSweep = false;     % option für Sweep der Frequenz; true für an, false für aus. Bei aus wird baseFreq als Frequenz benutzt.
 baseFreq = 1;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
 endFreq = 10;          % Endfrequenz für Sweep [Hz]
 freqSteps = 2;          % Schritte für den Frequenzsweep
@@ -203,6 +203,17 @@ title('Transport AC loss')
 xlabel('I_0 [A]')
 ylabel('Q [J/m]')
 legend('Numeric','Norris')
+
+norris_sym_diff = Q_vector - Q_norris; % Differenz zwischen simulierten und berechneten Werten als Vektor
+
+% Differenz plotten
+figure(504)
+clf
+plot(I0_vector,norris_sym_diff)
+hold on
+plot([0 I0_vector(end)],[0 0])  % Referenzlinie bei 0
+
+
 end
 end
 end
