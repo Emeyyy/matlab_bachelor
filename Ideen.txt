@@ -1,0 +1,3 @@
+Weitere Ideen zum hinzufügen
+
+-Methode um statt eingelesenen Daten einen n-Wert sweep durchzuführen, um verschiedene n-Werte bei festen Ic zu untersuchen
