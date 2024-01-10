@@ -150,7 +150,7 @@ for i = 1:numel(I0_vector)
         area(y_middle,maxMatrix)
         ylim([0 maxy])
         title(['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K'])
-        subtitle(num2str(I0_vector(i)))
+        subtitle(['I0 = ',num2str(I0_vector(i)),' A'])
         xlabel('Position im Leiter [m]')
         ylabel('J [A/m]')
         drawnow
