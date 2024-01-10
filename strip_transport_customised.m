@@ -205,16 +205,17 @@ ylabel('Q [J/m]')
 legend('Numeric','Norris')
 
 norris_sym_diff = Q_vector - Q_norris; % Differenz zwischen simulierten und berechneten Werten als Vektor
+I0_percentage = linspace(0,1,length(I0_vector));  % Vector 0-100 in schritten von I0 berechnen für relative darstellung
 
 % Differenz plotten, nur bei Currentsweep
 figure(504)
 clf
-plot(I0_vector,norris_sym_diff)
+plot(I0_percentage,norris_sym_diff)
 hold on
-plot([0 I0_vector(end)],[0 0])  % Referenzlinie bei 0
+plot([0 I0_percentage(end)],[0 0])  % Referenzlinie bei 0
 title('Differenz Zwischen der simulierten Werte und Norris')
 subtitle('Über der Referenzlinie sind die Verluste der simulierten Werte größer, unterhalb die von Norris')
-xlabel('I_0 [A]')
+xlabel('I0/Ic')
 ylabel('Numeric - Norris [J/m]')
 legend('Differenz','Referenz')
 
