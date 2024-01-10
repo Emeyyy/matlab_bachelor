@@ -149,7 +149,8 @@ for i = 1:numel(I0_vector)
         clf
         area(y_middle,maxMatrix)
         ylim([0 maxy])
-        title(['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm , Ic = ',num2str(Jc_variable(count)),' A'])
+        title(['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K'])
+        subtitle(num2str(I0_vector(i)))
         xlabel('Position im Leiter [m]')
         ylabel('J [A/m]')
         drawnow
@@ -215,7 +216,7 @@ hold on
 plot([0 I0_percentage(end)],[0 0])  % Referenzlinie bei 0
 title('Differenz Zwischen der simulierten Werte und Norris')
 subtitle({'Über der Referenzlinie sind die Verluste der simulierten Werte größer, unterhalb die von Norris',
-    ['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm , Ic = ',num2str(Jc_variable(count)),' A']})
+    ['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K']})
 xlabel('I0/Ic')
 ylabel('Numeric - Norris [J/m]')
 legend('Differenz','Referenz')
