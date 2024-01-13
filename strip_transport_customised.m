@@ -227,7 +227,7 @@ plot(I0_percentage,norris_sym_diff)
 hold on
 plot([0 I0_percentage(end)],[0 0])  % Referenzlinie bei 0
 title('Differenz Zwischen der simulierten Werte und Norris')
-subtitle({'Über der Referenzlinie sind die Verluste der simulierten Werte größer, unterhalb die von Norris',
+subtitle({'Über der Referenzlinie sind die Verluste der simulierten Werte größer, unterhalb die von Norris', ...
     ['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K']})
 xlabel('I0/Ic')
 ylabel('Numeric - Norris [J/m]')
