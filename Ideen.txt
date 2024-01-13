@@ -1,3 +1,7 @@
 Weitere Ideen zum hinzufügen
 
 -Methode um statt eingelesenen Daten einen n-Wert sweep durchzuführen, um verschiedene n-Werte bei festen Ic zu untersuchen
+
+-möglichkeit für n sweep n anzuzeigen, und für normalen betrieb mit daten temperatur anzeigen.
+
+-vielleicht n sweep umdrehen, für bessere darstellung
