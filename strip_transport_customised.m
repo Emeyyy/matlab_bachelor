@@ -7,6 +7,11 @@ clearvars;
 
 %optionen für das Programm
 
+n_test = true; 
+n_test_Jc = 25e3;
+base_n = 1;
+end_n = 100;
+n_steps = 20;
 currentSweep = true;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
 percentage = 0.9;       % Wenn currentSweep = false: Eingabe für bei welchen I0 = x*Ic untersucht werden soll
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
@@ -23,13 +28,20 @@ N = 100;            % number of elements for numerical calculation
 % Konstanten Definieren
 mu0 = 4e-7*pi;
 % Einlesen und Processing von externen Dateien, Definition von Variablen
-tempDat1 = readmatrix("Data_n.csv");      %Dateien in temporäre Matrix einlesen
-tempDat2 = readmatrix("Data_Jc.csv");    %Dateien in temporäre Matrix einlesen
-tempDat1 = rmmissing(tempDat1);     %NaN Eintrage entfernen
-tempDat2 = rmmissing(tempDat2);
-temperature = flip(tempDat1(:,1))';         %Daten flippen und transponieren, um mit den restlichen Vektoren übereinzustimmen
-Jc_variable = 100*flip(tempDat1(:,4))';     %Hier auch mit 100 multiplizieren, damit die Einheiten stimmen
-n_variable = flip(tempDat2(:,4))';
+n_Dat = readmatrix("Data_n.csv");      %Dateien in temporäre Matrix einlesen
+Jc_Dat = readmatrix("Data_Jc.csv");    %Dateien in temporäre Matrix einlesen
+n_Dat = rmmissing(n_Dat);     %NaN Eintrage entfernen
+Jc_Dat = rmmissing(Jc_Dat);
+
+if n_test == false
+    temperature = flip(n_Dat(:,1))';         %Daten flippen und transponieren, um mit den restlichen Vektoren übereinzustimmen
+    Jc_variable = 100*flip(n_Dat(:,4))';     %Hier auch mit 100 multiplizieren, damit die Einheiten stimmen
+    n_variable = flip(Jc_Dat(:,4))';
+else
+    Jc_variable = n_test_Jc*ones(1,n_steps);     % vektor mit der gleichen länge wie n_var erstellen, damit code funktioniert
+    n_variable = linspace(base_n,end_n,n_steps);
+    temperature = linspace(1,100,n_steps);      % temporary, need to change this variable name to something more general
+end
 
 % Setzen der Frequenzvariable
 if freqSweep == true
@@ -59,7 +71,7 @@ for count2 = 1:length(f_variable)   % for loop für Frequenzsweep
     Bext = @(t) B0*sin(omega*t);
     Bdot = @(t) omega*B0*cos(omega*t);
     
-for count = 1:length(temperature)    % for loop für Temperatursweep
+for count = 1:length(n_variable)    % for loop für Temperatursweep
 
     Ic = Jc_variable(count)*W_variable(count3);     %Kritischen Strom für momentane Temperatur setzen
 
@@ -148,7 +160,7 @@ for i = 1:numel(I0_vector)
         figure(104)
         clf
         area(y_middle,maxMatrix)
-        ylim([0 maxy])
+        %ylim([0 maxy]) % NICHT VERGESSEN NOCHMAL ANZUGUCKEN
         title(['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K'])
         subtitle(['I0 = ',num2str(I0_vector(i)),' A'])
         xlabel('Position im Leiter [m]')
