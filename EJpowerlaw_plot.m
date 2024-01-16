@@ -7,8 +7,10 @@ y4=x.^50;
 y5=x.^Inf;
 
 clf
-plot(x,y1,x,y2,x,y3,x,y4,x,y5,'LineWidth',2)
+plot(x,y1,x,y2,x,y3,x,y4,x,y5,'k','LineWidth',1.5)
+xline(1,'LineWidth',1.5,'Color','k')
 ylim([0 2])
 legend('n=1','n=5','n=15','n=50','Bean','Location','northwest')
 xlabel('J/J_{C}')
 ylabel('E/E_{0}')
+grid on
