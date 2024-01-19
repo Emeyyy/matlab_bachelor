@@ -5,23 +5,24 @@
 %Daten genommen von https://htsdb.wimbush.eu/dataset/3759327
 clearvars;
 
-%optionen für das Programm
+%%optionen für das Programm
 
-n_test = true; 
+
+n_test = false; 
 n_test_Jc = 25e3;
 base_n = 1;
-end_n = 100;
-n_steps = 20;
-currentSweep = true;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
+end_n = 25;
+n_steps = 1;
+currentSweep = false;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
 percentage = 0.9;       % Wenn currentSweep = false: Eingabe für bei welchen I0 = x*Ic untersucht werden soll
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
 freqSweep = true;     % option für Sweep der Frequenz; true für an, false für aus. Bei aus wird baseFreq als Frequenz benutzt.
 baseFreq = 1;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
-endFreq = 10;          % Endfrequenz für Sweep [Hz]
-freqSteps = 2;          % Schritte für den Frequenzsweep
+endFreq = 100000;          % Endfrequenz für Sweep [Hz]
+freqSteps = 20;          % Schritte für den Frequenzsweep
 
-% strip properties
-W_variable=[0.012,0.006,0.004,0.003]; % Erhältliche Breiten des zu untersuchenden Leiters, Manuell eintragen
+%% strip properties
+W=[0.012,0.006,0.004,0.003]; % Erhältliche Breiten des zu untersuchenden Leiters, Manuell eintragen
 Ec = 1e-4;          % electric field at J=Jc [V/m]
 N = 100;            % number of elements for numerical calculation
 
@@ -35,23 +36,23 @@ Jc_Dat = rmmissing(Jc_Dat);
 
 if n_test == false
     temperature = flip(n_Dat(:,1))';         %Daten flippen und transponieren, um mit den restlichen Vektoren übereinzustimmen
-    Jc_variable = 100*flip(n_Dat(:,4))';     %Hier auch mit 100 multiplizieren, damit die Einheiten stimmen
-    n_variable = flip(Jc_Dat(:,4))';
+    Jc = 100*flip(n_Dat(:,4))';     %Hier auch mit 100 multiplizieren, damit die Einheiten stimmen
+    n = flip(Jc_Dat(:,4))';
 else
-    Jc_variable = n_test_Jc*ones(1,n_steps);     % vektor mit der gleichen länge wie n_var erstellen, damit code funktioniert
-    n_variable = linspace(base_n,end_n,n_steps);
+    Jc = n_test_Jc*ones(1,n_steps);     % vektor mit der gleichen länge wie n_var erstellen, damit code funktioniert
+    n = linspace(base_n,end_n,n_steps);
     temperature = linspace(1,100,n_steps);      % temporary, need to change this variable name to something more general
 end
 
 % Setzen der Frequenzvariable
 if freqSweep == true
-    f_variable = linspace(baseFreq,endFreq,freqSteps);
+    f = linspace(baseFreq,endFreq,freqSteps);
 else
-    f_variable = baseFreq;
+    f = baseFreq;
 end
 
 
-q_values = zeros(size(Jc_variable,2),size(f_variable,2),size(W_variable,2));% Matrix für Abspeicherung der Werte definieren
+q_values = zeros(size(Jc,2),size(f,2),size(W,2));% Matrix für Abspeicherung der Werte definieren
 q_norris_values = zeros(size(q_values));
 
 gamma = 100;        % feedback constant for voltage source [V/m/A]
@@ -59,21 +60,21 @@ gamma = 100;        % feedback constant for voltage source [V/m/A]
 N_step = 1000;      % time steps per cycle
 
 %%% END OF SETTINGS %%%
-for count3 = 1:length(W_variable)   % for loop für Breitensweep
+for count3 = 1:length(W)   % for loop für Breitensweep
 
-for count2 = 1:length(f_variable)   % for loop für Frequenzsweep
+for count2 = 1:length(f)   % for loop für Frequenzsweep
 
     % Definition von Zeitvariablen
     B0 = 0.0;
-    omega = 2*pi*f_variable(count2);
-    dt = 1/(N_step*f_variable(count2));
-    t = 0:dt:2/f_variable(count2);
+    omega = 2*pi*f(count2);
+    dt = 1/(N_step*f(count2));
+    t = 0:dt:2/f(count2);
     Bext = @(t) B0*sin(omega*t);
     Bdot = @(t) omega*B0*cos(omega*t);
     
-for count = 1:length(n_variable)    % for loop für Temperatursweep
+for count = 1:length(n)    % for loop für Temperatursweep
 
-    Ic = Jc_variable(count)*W_variable(count3);     %Kritischen Strom für momentane Temperatur setzen
+    Ic = Jc(count)*W(count3);     %Kritischen Strom für momentane Temperatur setzen
 
     if currentSweep == true
         I0_vector = linspace(Ic/30,Ic,30);
@@ -83,7 +84,7 @@ for count = 1:length(n_variable)    % for loop für Temperatursweep
 
 % define left and right boundaries of the elements
 %y_vector = linspace(-(W_variable(count3))/2,(W_var(count2))/2,N+1)'; % option 1: linear spacing
-y_vector = -(W_variable(count3))/2*cos((0:N)/N*pi)'; % option 2: smaller elements near edges (better for low amplitudes)
+y_vector = -(W(count3))/2*cos((0:N)/N*pi)'; % option 2: smaller elements near edges (better for low amplitudes)
 y_left = y_vector(1:end-1);     % left boundaries of each element
 y_right = y_vector(2:end);      % right boundaries
 y_middle = (y_left+y_right)/2;  % middle point
@@ -109,8 +110,8 @@ for i = 1:numel(I0_vector)
     Iset = @(t) I0*sin(omega*t);
     
     % electric field function and derivative
-    E = @(J) Ec*sign(J).*abs(J./Jc_variable(count)).^n_variable(count);
-    dEdJ = @(J) Ec*(n_variable(count)./Jc_variable(count)).*abs(J./Jc_variable(count)).^((n_variable(count))-1);
+    E = @(J) Ec*sign(J).*abs(J./Jc(count)).^n(count);
+    dEdJ = @(J) Ec*(n(count)./Jc(count)).*abs(J./Jc(count)).^((n(count))-1);
     
     % initial current distribution
     J0 = zeros(N,1);
@@ -127,7 +128,7 @@ for i = 1:numel(I0_vector)
     
     % numerical integration
     options = odeset();
-    options.AbsTol = 1e-3*Jc_variable(count);
+    options.AbsTol = 1e-3*Jc(count);
     options.Jacobian = jac;
     options.Mass = K;
     options.MStateDependence = 'none';
@@ -161,7 +162,7 @@ for i = 1:numel(I0_vector)
         clf
         area(y_middle,maxMatrix)
         %ylim([0 maxy]) % NICHT VERGESSEN NOCHMAL ANZUGUCKEN
-        title(['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K'])
+        title(['Frequenz = ',num2str(f(count2)),' Hz, Breite = ',num2str(1000*W(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K'])
         subtitle(['I0 = ',num2str(I0_vector(i)),' A'])
         xlabel('Position im Leiter [m]')
         ylabel('J [A/m]')
@@ -228,7 +229,7 @@ hold on
 plot([0 I0_percentage(end)],[0 0])  % Referenzlinie bei 0
 title('Differenz Zwischen der simulierten Werte und Norris')
 subtitle({'Über der Referenzlinie sind die Verluste der simulierten Werte größer, unterhalb die von Norris', ...
-    ['Frequenz = ',num2str(f_variable(count2)),' Hz, Breite = ',num2str(1000*W_variable(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K']})
+    ['Frequenz = ',num2str(f(count2)),' Hz, Breite = ',num2str(1000*W(count3)),' mm, Ic = ',num2str(Ic),' A, T = ',num2str(temperature(count)),' K']})
 xlabel('I0/Ic')
 ylabel('Numeric - Norris [J/m]')
 legend('Differenz','Referenz')
@@ -249,7 +250,7 @@ if freqSweep == false
     figure(200)
     clf
     for k=1:size(q_noFreqSweep,2)
-        plot(temperature,q_noFreqSweep(:,k),'DisplayName',[num2str(1000*W_variable(k)),' mm'])
+        plot(temperature,q_noFreqSweep(:,k),'DisplayName',[num2str(1000*W(k)),' mm'])
         hold on
         plot(temperature,q_norris_values(:,:,k),'DisplayName','Norris')
         legend()
@@ -271,7 +272,7 @@ for k = 1:size(q_values,3)
     plot(temperature,q_norris_values(:,:,k),'DisplayName','Norris')
     ylim([0 qMax])  % Oberes Limit auf größten Wert festsetzen, um Ergebnisse besser vergleichen zu können
     xlim([temperature(1) temperature(end)])
-    title(['Breite = ',num2str(1000*W_variable(k)),' mm'])
+    title(['Breite = ',num2str(1000*W(k)),' mm'])
     xlabel('Temperatur [K]')
     ylabel('Q [J/m]')
     legend()
@@ -285,7 +286,7 @@ for k = 1:size(q_values,3)
     semilogy(temperature,q_values(:,:,k)) 
     ylim([0 qMax])
     xlim([temperature(1) temperature(end)])
-    title(['Breite = ',num2str(1000*W_variable(k)),' mm'])
+    title(['Breite = ',num2str(1000*W(k)),' mm'])
     xlabel('Temperatur [K]')
     ylabel('Q [J/m]')
 end
