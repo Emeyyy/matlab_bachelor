@@ -7,7 +7,7 @@ W = 0.012;          % strip width [m]
 Jc = 25e3;          % critical current per unit width [A/m]
 Ic = Jc*W;          % critical current [A]
 Ec = 1e-4;          % electric field at J=Jc [V/m]
-n = 100;             % n-value
+n = 50;             % n-value
 N = 100;            % number of elements for numerical calculation
 
 % external magnetic field (perpendicular) and applied current
@@ -18,7 +18,7 @@ Bext = @(t) B0*sin(omega*t);
 Bdot = @(t) omega*B0*cos(omega*t); % time derivative
 
 % applied current
-I0_vector = linspace(Ic/30,2*Ic,30); % amplitude vector
+I0_vector = linspace(Ic/30,1.5*Ic,30); % amplitude vector
 gamma = 100;        % feedback constant for voltage source [V/m/A]
 
 % time vector
@@ -105,11 +105,14 @@ for i = 1:numel(I0_vector)
     drawnow         
 end
 
+I0_relative = I0_vector./Ic;
+
 % plot loss per cycle
 figure(101)
 clf
-semilogy(I0_vector,Q_vector)
+semilogy(I0_relative,Q_vector,'LineWidth',1.5)
 hold on
+grid on
 % compare with exact result from Norris
 mu0 = 4e-7*pi;
 Q_norris = mu0*Ic^2/pi * ( ...
@@ -117,8 +120,8 @@ Q_norris = mu0*Ic^2/pi * ( ...
     (1+I0_vector/Ic).*log(1+I0_vector/Ic) - ...
     (I0_vector/Ic).^2 ...
 );
-plot(I0_vector,Q_norris)
+plot(I0_relative,Q_norris,'LineWidth',1.5)
 title('Transport AC loss')
-xlabel('I_0 [A]')
-ylabel('Q [J/m]')
-legend('Numeric','Norris')
+xlabel('I_0/I_C')
+ylabel('Q in J/m')
+legend('Numeric','Norris','Location','northwest')
