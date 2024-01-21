@@ -10,12 +10,12 @@ clearvars;
 
 
 currentSweep = false;   % Einstellung ob der Strom von 0 bis Ic gesweept werden soll
-percentage = 0.5;       % Wenn currentSweep = false: Eingabe für bei welchen I0 = x*Ic untersucht werden soll
+percentage = 0.25;       % Wenn currentSweep = false: Eingabe für bei welchen I0 = x*Ic untersucht werden soll
 heatmap = 1;            % option für Darstellung; 1 für Heatmap, 0 für Standard       
 freqSweep = true;     % option für Sweep der Frequenz; true für an, false für aus. Bei aus wird baseFreq als Frequenz benutzt.
-baseFreq = 1;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
-endFreq = 1000000;          % Endfrequenz für Sweep [Hz]
-freqSteps = 100;          % Schritte für den Frequenzsweep
+baseFreq = 10;           % Startfrequenz für Sweep [Hz], alternativ Frequenz ohne Sweep
+endFreq = 1000;          % Endfrequenz für Sweep [Hz]
+freqSteps = 50;          % Schritte für den Frequenzsweep
 
 %% strip properties
 W=0.012; % Erhältliche Breiten des zu untersuchenden Leiters, Manuell eintragen
@@ -28,7 +28,7 @@ mu0 = 4e-7*pi;
 
 
 Jc = 25e3;     % vektor mit der gleichen länge wie n_var erstellen, damit code funktioniert
-n = 5;
+n = [1,5,15,50];
 Ic = Jc*W;     %Kritischen Strom für momentane Temperatur setzen
 
 gamma = 100;        % feedback constant for voltage source [V/m/A]
@@ -45,7 +45,7 @@ else
 end
 
 
-q_values = zeros(size(f));% Matrix für Abspeicherung der Werte definieren
+q_values = zeros(size(n,2),size(f,2));% Matrix für Abspeicherung der Werte definieren
 q_norris_values = zeros(size(q_values));
 
 if currentSweep == true
@@ -67,14 +67,15 @@ w = y_right - y_left;           % element width
 
 %%% END OF SETTINGS %%%
 
+for count_n = 1:length(n)
 
-for count = 1:length(f)   % for loop für Frequenzsweep
+for count_freq = 1:length(f)   % for loop für Frequenzsweep
 
     % Definition von Zeitvariablen
     B0 = 0.0;
-    omega = 2*pi*f(count);
-    dt = 1/(N_step*f(count));
-    t = 0:dt:2/f(count);
+    omega = 2*pi*f(count_freq);
+    dt = 1/(N_step*f(count_freq));
+    t = 0:dt:2/f(count_freq);
     Bext = @(t) B0*sin(omega*t);
     Bdot = @(t) omega*B0*cos(omega*t);
     
@@ -99,8 +100,8 @@ for i = 1:numel(I0_vector)
     Iset = @(t) I0*sin(omega*t);
     
     % electric field function and derivative
-    E = @(J) Ec*sign(J).*abs(J./Jc).^n;
-    dEdJ = @(J) Ec*(n./Jc).*abs(J./Jc).^((n)-1);
+    E = @(J) Ec*sign(J).*abs(J./Jc).^n(count_n);
+    dEdJ = @(J) Ec*(n(count_n)./Jc).*abs(J./Jc).^((n(count_n))-1);
     
     % initial current distribution
     J0 = zeros(N,1);
@@ -140,7 +141,7 @@ for i = 1:numel(I0_vector)
 
     %bei erster J matrix den größten wert ermitteln, dies dann als limits
     %für y-achse verwenden.
-    if count==1 && i==1
+    if count_freq==1 && i==1
         maxy = 1.25*max(J, [], 'all');
     end
 
@@ -151,7 +152,7 @@ for i = 1:numel(I0_vector)
         clf
         area(y_middle,maxMatrix)
         %ylim([0 maxy]) % NICHT VERGESSEN NOCHMAL ANZUGUCKEN
-        title(['Frequenz = ',num2str(f(count)),' Hz, Breite = ',num2str(1000*W),' mm, Ic = ',num2str(Ic),' A'])
+        title(['Frequenz = ',num2str(f(count_freq)),' Hz, Breite = ',num2str(1000*W),' mm, Ic = ',num2str(Ic),' A'])
         subtitle(['I0 = ',num2str(I0_vector(i)),' A'])
         xlabel('Position im Leiter [m]')
         ylabel('J [A/m]')
@@ -170,12 +171,12 @@ for i = 1:numel(I0_vector)
     end
 
     if currentSweep == true
-        q_values(count) = Q_vector(24);     %Fallback auf Verlust bei I0 = 80%Ic 24, da Ic in 30 aufgeteilt ist
+        q_values(count_freq) = Q_vector(24);     %Fallback auf Verlust bei I0 = 80%Ic 24, da Ic in 30 aufgeteilt ist
     else
         %norris ist nicht von frequenz abhängig, also vielleicht ändern,
         %oder nur für keinen Sweep benutzen
-        q_values(count) = Q_vector(i); 
-        q_norris_values(count) = mu0*Ic^2/pi * ( ...
+        q_values(count_n,count_freq) = Q_vector(i); 
+        q_norris_values(count_n,count_freq) = mu0*Ic^2/pi * ( ...
             (1-I0_vector/Ic).*log(1-I0_vector/Ic) + ...
             (1+I0_vector/Ic).*log(1+I0_vector/Ic) - ...
             (I0_vector/Ic).^2 ...
@@ -183,6 +184,7 @@ for i = 1:numel(I0_vector)
     end
 
 
+end
 end
 end
 
@@ -194,11 +196,11 @@ figure(504)
 clf
 plot(f,norris_sym_diff)
 hold on
-yline(0,'-','Referenz')
 title('Differenz Zwischen der simulierten Werte und Norris')
 subtitle({'Über der Referenzlinie sind die Verluste der simulierten Werte größer, unterhalb die von Norris', ...
-    ['Ic = ',num2str(Ic),' A']})
+    ['I_0/I_C = ',num2str(percentage)]})
 xlabel('Frequenz in Hz')
 ylabel('Numeric - Norris in J/m')
-legend('Differenz')
+yline(0,'-','Referenz')
+legend('n=1','n=5','n=15','n=50')
 
